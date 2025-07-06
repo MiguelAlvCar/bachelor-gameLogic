@@ -1,0 +1,5 @@
+name: nn-gameLogic
+dependencies:
+  - python=3.13.5
+  - pip:
+      - -e .
