@@ -8,6 +8,10 @@
     ```
 # Install new dependencies
 - edit file `environment.yml`
+- activate the environment in anaconda prompt:
+    ```sh
+    conda activate nn-gameLogic
+    ```
 - run:
     ```sh
     conda env update -f environment.yml
