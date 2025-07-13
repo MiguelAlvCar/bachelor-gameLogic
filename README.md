@@ -6,6 +6,7 @@
     ```sh
     conda env create -f environment.yml
     ```
+
 # Install new dependencies
 - edit file `environment.yml`
 - activate the environment in anaconda prompt:
@@ -15,4 +16,10 @@
 - run:
     ```sh
     conda env update -f environment.yml
+    ```
+
+# Test the application
+- run mypy:
+    ```sh
+    mypy .
     ```
