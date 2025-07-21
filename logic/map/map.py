@@ -1,6 +1,7 @@
-from logic.map.field import Field
-from logic.map.fieldType import FieldType
+import numpy as np
+import numpy.typing as npt
 
 class Map:
-    def __init__(self, width: int, length: int):
-        self.fields: list[list[Field]] = [[Field(FieldType.PLAIN) for _ in range(width)] for _ in range(length)]
+    def __init__(self, width: int, height: int):
+        # First bool value: PLAIN
+        self.field_types: npt.NDArray[np.bool_] = np.ones((height, width, 1), dtype=np.bool_)

@@ -2,7 +2,9 @@
 name = "game-logic"
 version = "0.1.0"
 dependencies = [
-    "mypy==1.16.0"
+    "mypy==1.16.0",
+    "numpy==2.2.6",
+    "numba==0.61.2"
 ]
 
 [build-system]
