@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from logic.game.share.random import get_random_not_overlapping_positions
+from logic.game.share.get_random_positions import get_random_not_overlapping_positions
 
 class TestRandom(unittest.TestCase):
     def test_get_random_all(self):
