@@ -15,7 +15,7 @@ build-backend = "setuptools.build_meta"
 where = ["."]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12.11"
 strict = true
 ignore_missing_imports = true
 check_untyped_defs = true
