@@ -13,7 +13,7 @@ async def command(chasing_game: ChasingGameBase, unit_index: int, command_index:
     if (chasing_game.is_red_turn and not is_red_command) or (not chasing_game.is_red_turn and is_red_command):
         raise InvalidCommandError(f"A command for {"red" if is_red_command else "blue"} units was receive during the "+
                                   f"{"blue" if is_red_command else "red"} turn")
-    if (chasing_game._is_red_win or chasing_game._is_blue_win):
+    if (chasing_game.is_red_win or chasing_game.is_blue_win):
         raise InvalidCommandError("A command was receive after the win")
 
     if is_red_command:
@@ -31,7 +31,7 @@ async def command(chasing_game: ChasingGameBase, unit_index: int, command_index:
     edited_red_units = np.array([], dtype=np.int16)
     edited_blue_units = np.array([], dtype=np.int16)
     if command_index == CommandType.QUIET:
-        chasing_game.is_red_turn = not chasing_game.is_red_turn
+        _change_turn(chasing_game)
         return edited_red_units, edited_blue_units
 
     target_field = chasing_game.map.find_direction_field(command_index.value, unit_positions[unit_index])
@@ -55,5 +55,12 @@ async def command(chasing_game: ChasingGameBase, unit_index: int, command_index:
         else:
             edited_blue_units = np.append(edited_blue_units, unit_index)
 
-    chasing_game.is_red_turn = not chasing_game.is_red_turn
+
+    _change_turn(chasing_game)
+
     return edited_red_units, edited_blue_units
+
+def _change_turn(chasing_game):
+    chasing_game.is_red_turn = not chasing_game.is_red_turn
+    if not chasing_game.is_red_turn:
+        chasing_game.turn_number = chasing_game.turn_number + 1

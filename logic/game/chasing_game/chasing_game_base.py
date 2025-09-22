@@ -18,17 +18,19 @@ class ChasingGameBase:
     red_unit_positions: npt.NDArray[np.int16]
     red_unit_healths: npt.NDArray[np.float32]
 
+    turn_number: int
     is_red_turn: bool
-    _is_red_win: bool
-    _is_blue_win: bool
+    is_red_win: bool
+    is_blue_win: bool
 
     command_fn: Callable
 
     def __init__(self, initialize, command):
-        self._is_blue_win = False
-        self._is_red_win = False
+        self.is_blue_win = False
+        self.is_red_win = False
         initialize(self)
         self.command_fn = command
+        self.turn_number = 0
 
     async def command(self, unit_index: int, command_type: CommandType, is_red_command: bool, on_winning: Callable[[bool], Awaitable[None]]
                 ) -> tuple[npt.NDArray[np.int16], npt.NDArray[np.int16]]:
