@@ -8,13 +8,13 @@ from logic.game.chasing_game.chasing_game_base import ChasingGameBase
 from logic.game.chasing_game.combat import combat
 
 async def command(chasing_game: ChasingGameBase, unit_index: int, command_index: CommandType, is_red_command: bool,
-            on_winning: Callable[[bool], Awaitable[None]]
+            on_winning: Callable[[bool], Awaitable[None]], on_tide: Callable[[], Awaitable[None]]
             ) -> tuple[npt.NDArray[np.int16], npt.NDArray[np.int16]]:
     if (chasing_game.is_red_turn and not is_red_command) or (not chasing_game.is_red_turn and is_red_command):
         raise InvalidCommandError(f"A command for {"red" if is_red_command else "blue"} units was receive during the "+
                                   f"{"blue" if is_red_command else "red"} turn")
-    if (chasing_game.is_red_win or chasing_game.is_blue_win):
-        raise InvalidCommandError("A command was receive after the win")
+    if chasing_game.is_red_win or chasing_game.is_blue_win or chasing_game.is_tie:
+        raise InvalidCommandError("A command was receive after the end of the game")
 
     if is_red_command:
         unit_positions = chasing_game.red_unit_positions
@@ -31,7 +31,7 @@ async def command(chasing_game: ChasingGameBase, unit_index: int, command_index:
     edited_red_units = np.array([], dtype=np.int16)
     edited_blue_units = np.array([], dtype=np.int16)
     if command_index == CommandType.QUIET:
-        _change_turn(chasing_game)
+        await _change_turn(chasing_game, on_tide)
         return edited_red_units, edited_blue_units
 
     target_field = chasing_game.map.find_direction_field(command_index.value, unit_positions[unit_index])
@@ -56,11 +56,16 @@ async def command(chasing_game: ChasingGameBase, unit_index: int, command_index:
             edited_blue_units = np.append(edited_blue_units, unit_index)
 
 
-    _change_turn(chasing_game)
+    await _change_turn(chasing_game, on_tide)
 
     return edited_red_units, edited_blue_units
 
-def _change_turn(chasing_game):
+async def _change_turn(chasing_game: ChasingGameBase, on_tide: Callable[[], Awaitable[None]]):
     chasing_game.is_red_turn = not chasing_game.is_red_turn
     if not chasing_game.is_red_turn:
         chasing_game.turn_number = chasing_game.turn_number + 1
+        if chasing_game.turn_number == chasing_game.tie_turn_number:
+            if on_tide:
+                await on_tide()
+            chasing_game.is_tie = True
+

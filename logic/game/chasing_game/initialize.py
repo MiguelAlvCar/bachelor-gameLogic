@@ -27,5 +27,3 @@ def initialize (chasing_game: ChasingGameBase):
     chasing_game.red_unit_positions = np.array([positions[1, :]], dtype=np.int16)
     chasing_game.map.position_red_units[positions[1, 0], positions[1, 1]] = 0
     chasing_game.red_unit_healths = np.array([lifes[1]], dtype=np.float32)
-
-    chasing_game.is_red_turn = False
