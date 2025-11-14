@@ -1,6 +1,6 @@
 from enum import Enum
 
-class CommandType(Enum):
+class Directions(Enum):
     LEFT = 0
     UP_LEFT = 1
     UP_RIGHT = 2

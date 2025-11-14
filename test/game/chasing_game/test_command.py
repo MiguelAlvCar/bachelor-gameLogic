@@ -7,7 +7,7 @@ from typing import Callable, Awaitable
 from logic.game.chasing_game.chasing_game import ChasingGameBase
 from logic.map.map import Map
 from logic.game.share.invalid_command_error import InvalidCommandError
-from logic.game.chasing_game.command_type import CommandType
+from logic.map.geometry.directions import Directions
 from logic.game.chasing_game.command import command
 
 def make_initialize_mock(positions_par, healths = np.array([1.0, 1.0])):
@@ -51,30 +51,30 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
     async def test_command_error1(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[0, 0],[1, 1]])), command=command)
         with self.assertRaises(InvalidCommandError) as error:
-            await game.command(unit_index=0, command_type=CommandType.DOWN_LEFT, is_red_command=True, on_winning=None, on_tide=None)
+            await game.command(unit_index=0, command_type=Directions.DOWN_LEFT, is_red_command=True, on_winning=None, on_tide=None)
         self.assertEqual(str(error.exception), "A command for red units was receive during the blue turn")
 
     async def test_command_error2(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[0, 0],[1, 1]])), command=command)
         with self.assertRaises(InvalidCommandError) as error:
-            await game.command(unit_index=1, command_type=CommandType.DOWN_LEFT, is_red_command=False, on_winning=None, on_tide=None)
+            await game.command(unit_index=1, command_type=Directions.DOWN_LEFT, is_red_command=False, on_winning=None, on_tide=None)
         self.assertEqual(str(error.exception), "The index of the unit '1' is higher or equal than the number of units '1'")
 
     async def test_command_quiet(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[0, 0],[1, 1]])), command=command)
-        await game.command(unit_index=0, command_type=CommandType.QUIET, is_red_command=False, on_winning=None, on_tide=None)
+        await game.command(unit_index=0, command_type=Directions.QUIET, is_red_command=False, on_winning=None, on_tide=None)
         npt.assert_array_equal(game.blue_unit_positions, np.array([[0, 0]]))
         self.assertTrue(game.is_red_turn)
 
     async def test_command_error4(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[0, 0],[0, 1]])), command=command)
         with self.assertRaises(InvalidCommandError) as error:
-            await game.command(unit_index=0, command_type=CommandType.UP_LEFT, is_red_command=False, on_winning=None, on_tide=None)
+            await game.command(unit_index=0, command_type=Directions.UP_LEFT, is_red_command=False, on_winning=None, on_tide=None)
         self.assertEqual(str(error.exception), "Movement outside of board")
 
     async def test_command_1(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[0, 0],[1, 1]])), command=command)
-        await game.command(unit_index=0, command_type=CommandType.RIGHT, is_red_command=False, on_winning=None, on_tide=None)
+        await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False, on_winning=None, on_tide=None)
         npt.assert_array_equal(game.blue_unit_positions, np.array([[0, 1]]))
         self.assertTrue(game.is_red_turn)
 
@@ -93,11 +93,11 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
                 old_healths = game.blue_unit_healths.copy()
                 old_position = unit_positions[0].copy()
 
-                await game.command(unit_index=0, command_type=CommandType(number), is_red_command=is_red_command, on_winning=None, on_tide=None)
-                if CommandType(number) != CommandType.QUIET and old_healths[0] == game.blue_unit_healths[0]:
+                await game.command(unit_index=0, command_type=Directions(number), is_red_command=is_red_command, on_winning=None, on_tide=None)
+                if Directions(number) != Directions.QUIET and old_healths[0] == game.blue_unit_healths[0]:
                     self.assertFalse(np.array_equal(old_position, unit_positions[0]))
             except InvalidCommandError as e:
-                await game.command(unit_index=0, command_type=CommandType.QUIET, is_red_command=is_red_command, on_winning=None, on_tide=None)
+                await game.command(unit_index=0, command_type=Directions.QUIET, is_red_command=is_red_command, on_winning=None, on_tide=None)
 
             is_red_command = not is_red_command
 
@@ -106,7 +106,7 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         old_blue_positions = game.blue_unit_positions.copy()
         old_red_positions = game.red_unit_positions.copy()
 
-        await game.command(unit_index=0, command_type=CommandType.LEFT, is_red_command=False, on_winning=None, on_tide=None)
+        await game.command(unit_index=0, command_type=Directions.LEFT, is_red_command=False, on_winning=None, on_tide=None)
 
         np.testing.assert_array_equal(game.red_unit_positions, old_red_positions)
         np.testing.assert_array_equal(game.blue_unit_positions, old_blue_positions)
@@ -114,7 +114,7 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
     async def test_combat2(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[1, 2],[1, 1]])), command=command)
 
-        edited_units = await game.command(unit_index=0, command_type=CommandType.LEFT, is_red_command=False, on_winning=None, on_tide=None)
+        edited_units = await game.command(unit_index=0, command_type=Directions.LEFT, is_red_command=False, on_winning=None, on_tide=None)
 
         np.testing.assert_array_equal(edited_units[0], np.array([0]))
         np.testing.assert_array_equal(edited_units[1], np.array([0]))
@@ -122,30 +122,30 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
     async def test_win1(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[0, 0],[0, 1]]), np.array([0.1, 0.1])), command=command)
         is_on_winning_run = {}
-        await game.command(unit_index=0, command_type=CommandType.RIGHT, is_red_command=False, on_winning=make_on_winning(is_on_winning_run), on_tide=None)
+        await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False, on_winning=make_on_winning(is_on_winning_run), on_tide=None)
 
         self.assertTrue(is_on_winning_run["run"])
 
         with self.assertRaises(InvalidCommandError) as error:
-            await game.command(unit_index=0, command_type=CommandType.LEFT, is_red_command=True, on_winning=make_on_winning({}), on_tide=None)
+            await game.command(unit_index=0, command_type=Directions.LEFT, is_red_command=True, on_winning=make_on_winning({}), on_tide=None)
 
         self.assertEqual(str(error.exception), "A command was receive after the end of the game")
 
     async def test_tie1(self):
         game = ChasingGameBase(initialize=make_initialize_mock(np.array([[0, 0],[0, 1]]), np.array([1., 1.])), command=command)
         game.turn_number = game.tie_turn_number - 1
-        await game.command(unit_index=0, command_type=CommandType.RIGHT, is_red_command=False,
+        await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False,
                         on_winning=None, on_tide=make_on_tie({}))
 
         is_on_tie_run = {}
-        await game.command(unit_index=0, command_type=CommandType.RIGHT, is_red_command=True,
+        await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=True,
                         on_winning=None, on_tide=make_on_tie(is_on_tie_run))
 
         self.assertTrue(game.is_tie)
         self.assertTrue(is_on_tie_run["run"])
 
         with self.assertRaises(InvalidCommandError) as error:
-            await game.command(unit_index=0, command_type=CommandType.RIGHT, is_red_command=False,
+            await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False,
                             on_winning=None, on_tide=make_on_tie({}))
 
         self.assertEqual(str(error.exception), "A command was receive after the end of the game")

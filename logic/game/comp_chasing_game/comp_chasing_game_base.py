@@ -7,15 +7,13 @@ from logic.map.geometry.directions import Directions
 from logic.game.share.game_base import GameBase
 
 
-class ChasingGameBase(GameBase):
+class CompChasingGameBase(GameBase):
 
-    def __init__(self, initialize, command):
+    def __init__(self, initialize, command, width: int, height: int, hills_percentage: float, forests_percentage: float, cities_percentage: float):
 
         super().__init__()
 
-        self.command_fn: Callable = None
-
-        initialize(self)
+        initialize(self, width, height, hills_percentage, forests_percentage, cities_percentage)
 
         self.command_fn = command
 

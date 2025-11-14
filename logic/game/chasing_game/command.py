@@ -3,11 +3,11 @@ import numpy.typing as npt
 from typing import Callable, Awaitable
 
 from logic.game.share.invalid_command_error import InvalidCommandError
-from logic.game.chasing_game.command_type import CommandType
+from logic.map.geometry.directions import Directions
 from logic.game.chasing_game.chasing_game_base import ChasingGameBase
 from logic.game.chasing_game.combat import combat
 
-async def command(chasing_game: ChasingGameBase, unit_index: int, command_index: CommandType, is_red_command: bool,
+async def command(chasing_game: ChasingGameBase, unit_index: int, command_index: Directions, is_red_command: bool,
             on_winning: Callable[[bool], Awaitable[None]], on_tide: Callable[[], Awaitable[None]]
             ) -> tuple[npt.NDArray[np.int16], npt.NDArray[np.int16]]:
     if (chasing_game.is_red_turn and not is_red_command) or (not chasing_game.is_red_turn and is_red_command):
@@ -30,7 +30,7 @@ async def command(chasing_game: ChasingGameBase, unit_index: int, command_index:
 
     edited_red_units = np.array([], dtype=np.int16)
     edited_blue_units = np.array([], dtype=np.int16)
-    if command_index == CommandType.QUIET:
+    if command_index == Directions.QUIET:
         await _change_turn(chasing_game, on_tide)
         return edited_red_units, edited_blue_units
 
