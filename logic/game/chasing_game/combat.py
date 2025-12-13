@@ -2,10 +2,11 @@ import numpy.typing as npt
 import numpy as np
 
 from typing import Callable, Awaitable
-from logic.game.chasing_game.chasing_game_base import ChasingGameBase
+from logic.game.share.game_base import GameBase
 
 
-async def combat(game: ChasingGameBase, unit_index: int, enemy_unit_index: int, is_red_command: bool, on_winning: Callable[[bool], Awaitable[None]]
+async def combat(game: GameBase, unit_index: int, enemy_unit_index: int, is_red_command: bool,
+                 on_finished: Callable[[float], Awaitable[None]]
            ) -> Awaitable[tuple[npt.NDArray[np.int16], npt.NDArray[np.int16]]]:
     if is_red_command:
         enemy_healths = game.blue_unit_healths
@@ -20,22 +21,16 @@ async def combat(game: ChasingGameBase, unit_index: int, enemy_unit_index: int, 
 
     enemy_healths[enemy_unit_index] -= 0.2
     if np.all(enemy_healths < 0.001):
-        if on_winning:
-            await on_winning(is_red_command)
-        if is_red_command:
-            game.is_red_win = True
-            return np.array([], dtype=np.int16), np.array([blue_index], dtype=np.int16)
-        else:
-            game.is_blue_win = True
-            return np.array([red_index], dtype=np.int16), np.array([], dtype=np.int16)
+        result = 1 if is_red_command else 0
+        if on_finished:
+            await on_finished(result)
+        game.result = result
     else:
         friend_healths[unit_index] -= 0.2
         if np.all(friend_healths < 0.001):
-            if on_winning:
-                await on_winning(not is_red_command)
-            if is_red_command:
-                game.is_blue_win = True
-            else:
-                game.is_red_win = True
+            result = 0 if is_red_command else 1
+            if on_finished:
+                await on_finished(result)
+            game.result = result
 
     return np.array([red_index], dtype=np.int16), np.array([blue_index], dtype=np.int16)

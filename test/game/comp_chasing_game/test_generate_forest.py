@@ -7,5 +7,5 @@ from logic.map.map import Map
 class TestGenerateForest(unittest.TestCase):
 
     def test_generate_forest(self):
-        map = Map(width=5, height=5)
+        map = Map(width=15, height=5)
         generate_forests(map, 0.2)

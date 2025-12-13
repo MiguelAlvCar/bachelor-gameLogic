@@ -1,9 +1,9 @@
 import random
 import numpy as np
 
-from logic.map.field_type import FieldType
+from logic.map.terrain_type import TerrainType
 from logic.map.map import Map
-from collections import defaultdict
+from logic.map.geometry.expand_area import expand_area
 
 def generate_forests(map: Map, forest_percentage: float):
     padding = 4
@@ -13,40 +13,26 @@ def generate_forests(map: Map, forest_percentage: float):
     forest_coords = set()
 
     while len(forest_coords) < (map.width * map.height * forest_percentage):
-        forest_size = random.randint(1, 17)
+        forest_size = random.randint(1, 13)
         probs = weights / weights.sum()
         flat_probs = probs.ravel()
         flat_index = np.random.choice(flat_probs.size, p=flat_probs)
         forest_begin = np.unravel_index(flat_index, probs.shape)
 
-        adjacent_forest_coords = defaultdict(float)
+        forest_area = expand_area(forest_size, forest_begin, map.width + 2 * padding, map.height + 2 * padding, 2.5)
 
-        next_fields = map.find_next_fields(np.array(forest_begin))
-        next_fields = next_fields[(next_fields[:, 0] >= 0)]
-        forest_begin = forest_begin[0] - padding, forest_begin[1] - padding
-        if (forest_begin[0] >= 0) and (forest_begin[1] >= 0) & (forest_begin[0] < map.height) & (forest_begin[1] < map.width):
-            if map.field_types[forest_begin[0], forest_begin[1]] == FieldType.HILL.value:
-                map.field_types[forest_begin[0], forest_begin[1]] = FieldType.FOREST_HILL.value
+        forest_area = forest_area - padding
+        forest_area = forest_area[
+            (forest_area[:, 0] >= 0) &
+            (forest_area[:, 0] < map.width) &
+            (forest_area[:, 1] >= 0) &
+            (forest_area[:, 1] < map.height)
+        ]
+
+        forest_coords.update({(f[0], f[1]) for f in forest_area})
+
+        for f in forest_area:
+            if map.terrain_types[f[1], f[0]] == TerrainType.HILL.value:
+                map.terrain_types[f[1], f[0]] = TerrainType.FOREST_HILL.value
             else:
-                map.field_types[forest_begin[0], forest_begin[1]] = FieldType.FOREST.value
-            forest_coords.add(tuple(forest_begin))
-        for f in next_fields:
-            adjacent_forest_coords[tuple(f)] += 1.0
-
-        for _ in range(1, forest_size):
-            keys = list(adjacent_forest_coords.keys())
-            values = np.array(list(adjacent_forest_coords.values()), dtype=float)
-            probs = values / values.sum()
-            forest_field = random.choices(keys, weights=probs, k=1)[0]
-
-            next_fields = map.find_next_fields(np.array(forest_field))
-            next_fields = next_fields[(next_fields[:, 0] >= 0)]
-            forest_field = forest_field[0] - padding, forest_field[1] - padding
-            if (forest_field[0] >= 0) and (forest_field[1] >= 0) & (forest_field[0] < map.height) & (forest_field[1] < map.width):
-                if map.field_types[forest_field[0], forest_field[1]] == FieldType.HILL.value:
-                    map.field_types[forest_field[0], forest_field[1]] = FieldType.FOREST_HILL.value
-                else:
-                    map.field_types[forest_field[0], forest_field[1]] = FieldType.FOREST.value
-                forest_coords.add(tuple(forest_field))
-            for f in next_fields:
-                adjacent_forest_coords[tuple(f)] += 1.0
+                map.terrain_types[f[1], f[0]] = TerrainType.FOREST.value

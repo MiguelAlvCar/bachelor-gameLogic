@@ -11,11 +11,14 @@ class Map:
 
     def __init__(self, width: int, height: int, find_next_fields = find_next_fields, find_direction_field = find_direction_field):
         # First bool value: PLAIN
-        self.field_types: npt.NDArray[np.int16] = np.zeros((height, width, 1), dtype=np.int16)
-        self.position_red_units: npt.NDArray[np.int16] = np.ones((height, width, 1), dtype=np.int16) * -1
-        self.position_blue_units: npt.NDArray[np.int16] = np.ones((height, width, 1), dtype=np.int16) * -1
+        self.terrain_types: npt.NDArray[np.int16] = np.zeros((height, width), dtype=np.int16)
+        self.position_red_units: npt.NDArray[np.int16] = np.ones((height, width), dtype=np.int16) * -1
+        self.position_blue_units: npt.NDArray[np.int16] = np.ones((height, width), dtype=np.int16) * -1
         self.width: int = width
         self.height: int = height
+        self.red_occupied_fields: dict[tuple[int, int], None] = {}
+        self.blue_occupied_fields: dict[tuple[int, int], None] = {}
+        self.number_cities = 0
 
         self._find_next_fields_fn = find_next_fields
         self._find_direction_field_fn = find_direction_field

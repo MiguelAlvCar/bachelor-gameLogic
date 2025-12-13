@@ -2,12 +2,13 @@ import unittest
 import numpy as np
 from typing import Callable, Awaitable
 
-from logic.game.chasing_game.chasing_game import ChasingGameBase
+from logic.game.share.game_base import GameBase
+from logic.game.chasing_game.chasing_game import ChasingGame
 from logic.map.map import Map
 from logic.game.chasing_game.combat import combat
 
 def make_initialize_mock(healths, positions_par):
-    def initialize_mock (chasing_game: 'ChasingGameBase'):
+    def initialize_mock (chasing_game: GameBase):
         width: int = 10
         height: int = 8
 
@@ -32,20 +33,24 @@ def make_initialize_mock(healths, positions_par):
     return initialize_mock
 
 def make_on_winning(is_on_winning_run: dict[str, bool]) -> Callable[[bool], Awaitable[None]]:
-    async def on_winning(is_red_winner: bool) -> None:
+    async def on_winning(is_red_winner: float) -> None:
         is_on_winning_run["value"] = True
     return on_winning
 
 class TestCombat(unittest.IsolatedAsyncioTestCase):
     async def test_combat(self):
-        game = ChasingGameBase(initialize=make_initialize_mock(np.array([0.4, 1.0]), np.array([[0, 0],[1, 1]])), command=None)
+        initialize_fn = make_initialize_mock(np.array([0.4, 1.0]), np.array([[0, 0],[1, 1]]))
+        game = ChasingGame(None)
+        initialize_fn(game)
         await combat(game, 0, 0, False, None)
         self.assertAlmostEqual(game.blue_unit_healths[0], 0.2)
         self.assertAlmostEqual(game.red_unit_healths[0], 0.8)
 
     async def test_win(self):
         is_on_winning_run = {"value": False}
-        game = ChasingGameBase(initialize=make_initialize_mock(np.array([1.0, 0.1]), np.array([[0, 0],[1, 1]])), command=None,)
+        initialize_fn = make_initialize_mock(np.array([1.0, 0.1]), np.array([[0, 0],[1, 1]]))
+        game = ChasingGame(None)
+        initialize_fn(game)
         await combat(game, 0, 0, False, make_on_winning(is_on_winning_run))
         self.assertAlmostEqual(game.blue_unit_healths[0], 1.0)
         self.assertTrue(game.red_unit_healths[0] < 0.0)
