@@ -21,14 +21,14 @@ async def combat(game: GameBase, unit_index: int, enemy_unit_index: int, is_red_
 
     enemy_healths[enemy_unit_index] -= 0.2
     if np.all(enemy_healths < 0.001):
-        result = 1 if is_red_command else 0
+        result = 1 if is_red_command else -1
         if on_finished:
             await on_finished(result)
         game.result = result
     else:
         friend_healths[unit_index] -= 0.2
         if np.all(friend_healths < 0.001):
-            result = 0 if is_red_command else 1
+            result = -1 if is_red_command else 1
             if on_finished:
                 await on_finished(result)
             game.result = result

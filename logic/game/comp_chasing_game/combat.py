@@ -204,4 +204,4 @@ async def _win(game: GameBase, on_winning, is_red_win):
     if is_red_win:
         game.result = 1
     else:
-        game.result = 0
+        game.result = -1

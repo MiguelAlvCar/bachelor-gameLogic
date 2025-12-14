@@ -36,7 +36,7 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
     edited_blue_units = np.array([], dtype=np.int16)
     if command_index == Directions.QUIET:
         unit_movement[unit_index] = 0
-        return edited_red_units, edited_blue_units
+        return edited_red_units, edited_blue_units, False, False
 
     target_field = game.map.find_direction_field(command_index.value, unit_positions[unit_index])
 
@@ -62,5 +62,5 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
 
     unit_movement[unit_index] -= 1
 
-    return edited_red_units, edited_blue_units, [], []
+    return edited_red_units, edited_blue_units, False, False
 

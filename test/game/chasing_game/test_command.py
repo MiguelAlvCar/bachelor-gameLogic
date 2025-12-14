@@ -159,14 +159,14 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         on_tide = make_on_tie(is_on_tie_run)
         game = ChasingGame(on_tide)
         initialize_fn(game)
-        game.turn_number = game.tie_turn_number - 1
+        game.turn_number = game.total_number_turns - 1
         await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False)
         await game.change_turn(False)
 
         await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=True)
         await game.change_turn(True)
 
-        self.assertTrue(game.result == 0.5)
+        self.assertTrue(game.result == 0.)
         self.assertTrue(is_on_tie_run["run"])
 
         with self.assertRaises(InvalidCommandError) as error:

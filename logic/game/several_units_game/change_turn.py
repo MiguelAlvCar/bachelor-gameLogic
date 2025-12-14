@@ -24,8 +24,8 @@ async def change_turn(game: GameBase, is_red_command: bool, on_finished: Callabl
 
     game.is_red_turn = not game.is_red_turn
 
-    relativ_diff = (len(game.map.red_occupied_fields) - len(game.map.blue_occupied_fields)) / game.map.number_cities
-    abs_relativ_diff =  abs(relativ_diff)
+    result = (len(game.map.red_occupied_fields) - len(game.map.blue_occupied_fields)) / game.map.number_cities
+    abs_relativ_diff =  abs(result)
 
     turn_sum = 1
     if game.map.number_cities == 1:
@@ -37,10 +37,9 @@ async def change_turn(game: GameBase, is_red_command: bool, on_finished: Callabl
 
     game.turn_number += turn_sum
 
-    if game.turn_number > game.number_turns:
-        result = (relativ_diff / 2) + 0.5
+    if game.turn_number > game.total_number_turns:
         if on_finished:
             await on_finished(result)
         game.result = result
 
-    return (game.number_turns - game.turn_number) // turn_sum
+    return (game.total_number_turns - game.turn_number) // turn_sum

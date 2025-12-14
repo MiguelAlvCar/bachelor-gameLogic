@@ -38,3 +38,5 @@ def initialize(game: GameBase, width: int, height: int, hills_percentage: float,
     game.red_unit_healths = np.array([lifes[1]], dtype=np.float32)
     game.red_unit_organization = np.array([organisation[1]], dtype=np.float32)
     game.red_unit_movement = set_movement(game.blue_unit_types, game.blue_unit_positions, game.map.terrain_types)
+
+    game.total_number_turns = 200

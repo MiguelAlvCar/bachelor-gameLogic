@@ -17,12 +17,11 @@ async def change_turn(game: GameBase, on_finished: Callable[[float], Awaitable[N
         game.red_unit_organization[mask] = game.red_unit_healths[mask]
 
     game.is_red_turn = not game.is_red_turn
-    if not game.is_red_turn:
-        game.turn_number = game.turn_number + 1
-        if game.turn_number == game.tie_turn_number:
-            result = 0.5
-            if on_finished:
-                await on_finished(result)
-            game.result = result
+    game.turn_number = game.turn_number + 1
+    if game.turn_number > game.total_number_turns:
+        result = 0
+        if on_finished:
+            await on_finished(result)
+        game.result = result
 
-    return game.tie_turn_number - game.turn_number
+    return game.total_number_turns - game.turn_number

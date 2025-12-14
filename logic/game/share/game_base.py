@@ -26,13 +26,12 @@ class GameBase:
         self.result: float | None = None
         self.is_red_turn: bool = False
         self.turn_number: int = 0
-        self.tie_turn_number = 100
 
         self.command_fn: Callable = command
         self.change_turn_fn: Callable = change_turn
         self.on_finished: Callable[[float], Awaitable[None]] = on_finished
 
-        self.number_turns: int = 0
+        self.total_number_turns: int = 0
 
     async def command(self, unit_index: int, command_type: Directions, is_red_command: bool,
                 ) -> tuple[npt.NDArray[np.int16], npt.NDArray[np.int16]]:

@@ -15,7 +15,7 @@ def initialize(game: GameBase, width: int, height: int, remaining_turns: int, hi
 
     generate_units(game, blue_generation_data, red_generation_data)
 
-    game.number_turns = remaining_turns
+    game.total_number_turns = remaining_turns
 
     for position in game.blue_unit_positions:
         terrain_type = game.map.terrain_types[position[0], position[1]]
