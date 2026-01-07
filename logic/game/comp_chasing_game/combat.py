@@ -8,6 +8,7 @@ from logic.map.geometry.directions import Directions
 from logic.game.comp_chasing_game.exchange_position import exchange_positions
 from logic.game.comp_chasing_game.change_position import change_position
 from logic.game.comp_chasing_game.rules.general_rules import limit_organisation_retreat, limit_organisation_attack
+from logic.map.coordinates.valid_coord import valid_coord
 
 
 async def combat(game: GameBase, own_unit_index: int, enemy_unit_index: int, is_red_command: bool, command_index: Directions,
@@ -83,9 +84,9 @@ async def combat(game: GameBase, own_unit_index: int, enemy_unit_index: int, is_
         friend1 = map_friend_positions[retreat_position1[0], retreat_position1[1]]
         friend2 = map_friend_positions[retreat_position2[0], retreat_position2[1]]
 
-        friend_posibilities = np.array([friend1 == -1 and retreat_position1[0] != -1,
-                                        friend_central == -1 and retreat_position_central[0] != -1,
-                                        friend2 == -1 and retreat_position2[0] != -1,])
+        friend_posibilities = np.array([friend1 == -1 and valid_coord(retreat_position1, game.map.playable_fields),
+                                        friend_central == -1 and valid_coord(retreat_position_central, game.map.playable_fields),
+                                        friend2 == -1 and valid_coord(retreat_position2, game.map.playable_fields)])
 
         sum = np.sum(friend_posibilities)
 

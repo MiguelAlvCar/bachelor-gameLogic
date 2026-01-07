@@ -3,9 +3,11 @@ from numba import njit
 from numba.typed import List
 from numba import types
 
+from logic.map.coordinates.valid_coord import valid_coord
+
 
 @njit(cache=True)
-def find_circumference(position, radius):
+def find_valid_circumference(position, mask, radius):
     circumference_fields = List.empty_list(types.int64[:])
 
     if radius == 0:
@@ -22,6 +24,8 @@ def find_circumference(position, radius):
                 coord[(i+2) % 3] = - (value * radius - value * k)
 
                 coord[0:2] += position
-                circumference_fields.append(coord[0:2])
+
+                if valid_coord(coord, mask):
+                    circumference_fields.append(coord[0:2])
 
     return circumference_fields

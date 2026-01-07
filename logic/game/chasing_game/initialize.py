@@ -4,7 +4,7 @@ from logic.map.map import Map
 from logic.game.share.get_random_positions import get_random_not_overlapping_positions
 from logic.game.share.game_base import GameBase
 from logic.game.share.set_movement import set_movement
-
+from logic.map.coordinates.evenr_to_axial import evenr_to_axial
 
 def initialize(game: GameBase):
     width: int = 10
@@ -16,6 +16,7 @@ def initialize(game: GameBase):
     number_of_red_units = 1
 
     positions = get_random_not_overlapping_positions(width, height, number_of_blue_units + number_of_red_units)
+    positions = evenr_to_axial(positions, game.map.height)
 
     lifes = np.random.uniform(0.1, 1.0, size=(2,)).astype(np.float32)
 

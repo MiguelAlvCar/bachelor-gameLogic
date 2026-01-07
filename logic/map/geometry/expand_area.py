@@ -1,43 +1,45 @@
 import random
 import numpy as np
+import numpy.typing as npt
 from numba import njit
 from numba import types
 from numba.typed import Dict
 
-from logic.map.geometry.find_next_fields import find_next_fields
+from logic.map.geometry.find_valid_circumference import find_valid_circumference
 
 
 # not compiled with numba, bacause random.choices is used
-def expand_area(area_size, area_start, width, height, rate):
+def expand_area(area_size, area_start: npt.NDArray[np.int64], playable_fields, rate):
     area_coords = Dict.empty(
         key_type=types.UniTuple(types.int64, 2),
         value_type=types.boolean,
     )
 
     adjacent_coords = Dict.empty(
-        key_type=types.UniTuple(types.int64, 2),
+        key_type=types.UniTuple(types.float64, 2),
         value_type=types.float32,
     )
 
-    _add_adjacent_coords(area_coords, adjacent_coords, area_start, width, height, rate)
+    _add_adjacent_coords(area_coords, adjacent_coords, area_start, playable_fields, rate)
 
     for _ in range(0, area_size - 1):
         keys = list(adjacent_coords.keys())
         values = np.array(list(adjacent_coords.values()), dtype=float)
         probs = values / values.sum()
         deployment_field = random.choices(keys, weights=probs)[0]
+        deployment_field = np.array(deployment_field, dtype=np.int64)
 
-        _add_adjacent_coords(area_coords, adjacent_coords, deployment_field, width, height, rate)
+        _add_adjacent_coords(area_coords, adjacent_coords, deployment_field, playable_fields, rate)
 
     return _get_keys_as_array(area_coords)
 
-@njit(cache=True)
-def _add_adjacent_coords(area_coords, adjacent_coords, deployment_field, width, height, rate):
-    next_fields = find_next_fields(np.array(deployment_field), width, height)
-    next_fields = next_fields[(next_fields[:, 0] >= 0)]
+#@njit(cache=True)
+def _add_adjacent_coords(area_coords, adjacent_coords, deployment_field, playable_fields, rate):
+    next_fields = find_valid_circumference(deployment_field, playable_fields, 1)
 
+    deployment_field = (deployment_field[0].item(), deployment_field[1].item())
     area_coords[deployment_field] = True
-    deployment_field = tuple(deployment_field)
+
     if deployment_field in adjacent_coords:
         del adjacent_coords[deployment_field]
 

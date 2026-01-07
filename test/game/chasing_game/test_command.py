@@ -8,8 +8,9 @@ from logic.game.share.game_base import GameBase
 from logic.map.map import Map
 from logic.game.share.invalid_command_error import InvalidCommandError
 from logic.map.geometry.directions import Directions
-from logic.game.chasing_game.command import command
 from logic.game.chasing_game.chasing_game import ChasingGame
+from logic.map.coordinates.evenr_to_axial import evenr_to_axial
+from logic.map.coordinates.axial_to_evenr import axial_to_evenr
 
 def make_initialize_mock(positions_par, healths = np.array([1.0, 1.0])):
     def initialize_mock (chasing_game: 'GameBase'):
@@ -50,15 +51,17 @@ def make_on_tie(is_on_tide_run: dict[str, bool]) -> Callable[[bool], Awaitable[N
 
 class TestCommand(unittest.IsolatedAsyncioTestCase):
     async def test_command_error1(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[1, 1]]))
         game = ChasingGame(None)
+        axial_coords = evenr_to_axial(np.array([[0, 0],[1, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         initialize_fn(game)
         with self.assertRaises(InvalidCommandError) as error:
             await game.command(unit_index=0, command_type=Directions.DOWN_LEFT, is_red_command=True)
         self.assertEqual(str(error.exception), "A command for red units was receive during the blue turn")
 
     async def test_command_error2(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[1, 1]]))
+        axial_coords = evenr_to_axial(np.array([[0, 0],[1, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         game = ChasingGame(None)
         initialize_fn(game)
         with self.assertRaises(InvalidCommandError) as error:
@@ -66,15 +69,17 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(str(error.exception), "The index of the unit '1' is higher or equal than the number of units '1'")
 
     async def test_command_quiet(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[1, 1]]))
+        axial_coords = evenr_to_axial(np.array([[0, 0],[1, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         game = ChasingGame(None)
         initialize_fn(game)
         await game.command(unit_index=0, command_type=Directions.QUIET, is_red_command=False)
-        npt.assert_array_equal(game.blue_unit_positions, np.array([[0, 0]]))
+        npt.assert_array_equal(axial_to_evenr(game.blue_unit_positions, 8), np.array([[0, 0]]))
         self.assertTrue(not game.is_red_turn)
 
     async def test_command_error4(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[0, 1]]))
+        axial_coords = evenr_to_axial(np.array([[0, 0],[0, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         game = ChasingGame(None)
         initialize_fn(game)
         with self.assertRaises(InvalidCommandError) as error:
@@ -82,15 +87,17 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(str(error.exception), "Movement outside of board")
 
     async def test_command_1(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[1, 1]]))
+        axial_coords = evenr_to_axial(np.array([[0, 0],[1, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         game = ChasingGame(None)
         initialize_fn(game)
         await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False)
-        npt.assert_array_equal(game.blue_unit_positions, np.array([[0, 1]]))
+        npt.assert_array_equal(axial_to_evenr(game.blue_unit_positions, 8), np.array([[0, 1]]))
         self.assertFalse(game.is_red_turn)
 
     async def test_several_commands(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[1, 1]]))
+        axial_coords = evenr_to_axial(np.array([[0, 0],[1, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         game = ChasingGame(None)
         initialize_fn(game)
         random_numbers = [random.randint(0, 6) for _ in range(15)]
@@ -117,7 +124,8 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
             is_red_command = not is_red_command
 
     async def test_combat1(self):
-        initialize_fn = make_initialize_mock(np.array([[1, 2],[1, 1]]))
+        axial_coords = evenr_to_axial(np.array([[1, 2],[1, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         game = ChasingGame(None)
         initialize_fn(game)
         old_blue_positions = game.blue_unit_positions.copy()
@@ -129,7 +137,8 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         np.testing.assert_array_equal(game.blue_unit_positions, old_blue_positions)
 
     async def test_combat2(self):
-        initialize_fn = make_initialize_mock(np.array([[1, 2],[1, 1]]))
+        axial_coords = evenr_to_axial(np.array([[1, 2],[1, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords)
         game = ChasingGame(None)
         initialize_fn(game)
 
@@ -139,7 +148,8 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         np.testing.assert_array_equal(edited_units[1], np.array([0]))
 
     async def test_win1(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[0, 1]]), np.array([0.1, 0.1]))
+        axial_coords = evenr_to_axial(np.array([[0, 0],[0, 1]]), 8)
+        initialize_fn = make_initialize_mock(axial_coords, np.array([0.1, 0.1]))
         is_on_winning_run = {}
         game = ChasingGame(make_on_winning(is_on_winning_run))
         initialize_fn(game)
@@ -154,7 +164,8 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(str(error.exception), "A command was receive after the end of the game")
 
     async def test_tie1(self):
-        initialize_fn = make_initialize_mock(np.array([[0, 0],[0, 1]]), np.array([1., 1.]))
+        axial_coords = evenr_to_axial(np.array([[0, 0],[0, 1]]), 8)
+        initialize_fn = make_initialize_mock( axial_coords, np.array([1., 1.]))
         is_on_tie_run = {}
         on_tide = make_on_tie(is_on_tie_run)
         game = ChasingGame(on_tide)
@@ -173,5 +184,3 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
             await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False)
 
         self.assertEqual(str(error.exception), "A command was receive after the end of the game")
-
-

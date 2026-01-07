@@ -6,6 +6,7 @@ from logic.game.share.invalid_command_error import InvalidCommandError
 from logic.map.geometry.directions import Directions
 from logic.game.share.game_base import GameBase
 from logic.game.chasing_game.combat import combat
+from logic.map.coordinates.valid_coord import valid_coord
 
 async def command(game: GameBase, unit_index: int, command_index: Directions, is_red_command: bool,
             on_finished: Callable[[float], Awaitable[None]]
@@ -40,7 +41,7 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
 
     target_field = game.map.find_direction_field(command_index.value, unit_positions[unit_index])
 
-    if target_field[0] == -1:
+    if not valid_coord(target_field, game.map.playable_fields):
         raise InvalidCommandError("Movement outside of board")
 
     if position_contrary_units[target_field[0], target_field[1]] != -1:

@@ -8,6 +8,8 @@ from logic.game.comp_chasing_game.comp_chasing_game import CompChasingGame
 from logic.game.share.set_movement import set_movement
 from logic.game.comp_chasing_game.exchange_position import exchange_positions
 from logic.map.geometry.directions import Directions
+from logic.map.coordinates.evenr_to_axial import evenr_to_axial
+from logic.map.coordinates.axial_to_evenr import axial_to_evenr
 
 def make_initialize_mock(
         red_positions = np.array([[1,1]]),
@@ -58,8 +60,8 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
     async def test_combat1(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1]]),
-            blue_positions = np.array([[0,0],[2,0],[2, 1],[1, 2]])
+            red_positions = evenr_to_axial(np.array([[1,1]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0],[2,0],[2, 1],[1, 2]]), 8)
         )
 
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
@@ -74,8 +76,8 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
     async def test_combat2(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1],[2,1],[1, 2]]),
-            blue_positions = np.array([[0,0],[2,0]])
+            red_positions = evenr_to_axial(np.array([[1,1],[2,1],[1, 2]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0],[2,0]]), 8)
         )
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
         initialize_fn(game)
@@ -91,28 +93,29 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
     async def test_combat3(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1],[1,2]]),
-            blue_positions = np.array([[0,0],[2,0]])
+            red_positions = evenr_to_axial(np.array([[1,1],[1,2]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0],[2,0]]), 8)
         )
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
         initialize_fn(game)
 
         await game.command(unit_index=0, command_type=Directions.DOWN_RIGHT, is_red_command=False)
 
-        npt.assert_array_equal(game.red_unit_positions[0], np.array([2,1]))
+        npt.assert_array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([2,1]))
 
 
     async def test_combat4(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1]]),
-            blue_positions = np.array([[0,0],[2,1]])
+            red_positions = evenr_to_axial(np.array([[1,1]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0],[2,1]]), 8)
         )
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
         initialize_fn(game)
 
         await game.command(unit_index=0, command_type=Directions.DOWN_RIGHT, is_red_command=False)
 
-        self.assertTrue(np.array_equal(game.red_unit_positions[0], np.array([2,0])) or np.array_equal(game.red_unit_positions[0], np.array([1,2])) )
+        self.assertTrue(np.array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([2,0])) or
+                        np.array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([1,2])) )
 
 
     async def test_combat5(self):
@@ -124,17 +127,17 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
             i += 1
 
             initialize_fn = make_initialize_mock(
-                red_positions = np.array([[1,1],[1,2],[2,0]]),
-                blue_positions = np.array([[0,0],[2,1]])
+                red_positions = evenr_to_axial(np.array([[1,1],[1,2],[2,0]]), 8),
+                blue_positions = evenr_to_axial(np.array([[0,0],[2,1]]), 8)
             )
             game = CompChasingGame(None, 8, 8, 0., 0., 0.)
             initialize_fn(game)
 
             await game.command(unit_index=0, command_type=Directions.DOWN_RIGHT, is_red_command=False)
 
-            if np.array_equal(game.red_unit_positions[0], np.array([2,0])):
+            if np.array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([2,0])):
                 left = True
-            elif np.array_equal(game.red_unit_positions[0], np.array([1,2])):
+            elif np.array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([1,2])):
                 right = True
             else:
                 raise ValueError(f"Unexpected position: {game.red_unit_positions}")
@@ -145,8 +148,8 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
     async def test_combat6(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1],[2,0],[2, 1],[1, 2]]),
-            blue_positions = np.array([[0,0]])
+            red_positions = evenr_to_axial(np.array([[1,1],[2,0],[2, 1],[1, 2]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0]]), 8)
         )
 
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
@@ -163,8 +166,8 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
     async def test_combat7(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1],[2, 1],[1, 2]]),
-            blue_positions = np.array([[0,0]])
+            red_positions = evenr_to_axial(np.array([[1,1],[2, 1],[1, 2]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0]]), 8)
         )
 
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
@@ -172,13 +175,13 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
         await game.command(unit_index=0, command_type=Directions.DOWN_RIGHT, is_red_command=False)
 
-        npt.assert_array_equal(game.red_unit_positions[0], np.array([2,0]))
+        npt.assert_array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([2,0]))
 
 
     async def test_combat8(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1],[2,0],[2, 1]]),
-            blue_positions = np.array([[0,0]])
+            red_positions = evenr_to_axial(np.array([[1,1],[2,0],[2, 1]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0]]), 8)
         )
 
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
@@ -186,13 +189,13 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
         await game.command(unit_index=0, command_type=Directions.DOWN_RIGHT, is_red_command=False)
 
-        npt.assert_array_equal(game.red_unit_positions[0], np.array([1, 2]))
+        npt.assert_array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([1, 2]))
 
 
     async def test_combat9(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,0]]),
-            blue_positions = np.array([[2,0]])
+            red_positions = evenr_to_axial(np.array([[1,0]]), 8),
+            blue_positions = evenr_to_axial(np.array([[2,0]]), 8)
         )
 
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
@@ -200,20 +203,20 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
 
         await game.command(unit_index=0, command_type=Directions.UP_LEFT, is_red_command=False)
 
-        npt.assert_array_equal(game.red_unit_positions[0], np.array([0, 0]))
+        npt.assert_array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([0, 0]))
 
 
     async def test_combat10(self):
         initialize_fn = make_initialize_mock(
-            red_positions = np.array([[1,1],[1,2]]),
-            blue_positions = np.array([[0,0],[2,1],[2,0]])
+            red_positions = evenr_to_axial(np.array([[1,1],[1,2]]), 8),
+            blue_positions = evenr_to_axial(np.array([[0,0],[2,1],[2,0]]), 8)
         )
         game = CompChasingGame(None, 8, 8, 0., 0., 0.)
         initialize_fn(game)
 
         await game.command(unit_index=0, command_type=Directions.DOWN_RIGHT, is_red_command=False)
 
-        npt.assert_array_equal(game.red_unit_positions[0], np.array([1,2]))
+        npt.assert_array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([1,2]))
 
 
     async def test_combat11(self):
@@ -225,17 +228,17 @@ class TestRulesSeveralUnits(unittest.IsolatedAsyncioTestCase):
             i += 1
 
             initialize_fn = make_initialize_mock(
-                red_positions = np.array([[1,1]]),
-                blue_positions = np.array([[0,0],[2,1]])
+                red_positions = evenr_to_axial(np.array([[1,1]]), 8),
+                blue_positions = evenr_to_axial(np.array([[0,0],[2,1]]), 8)
             )
             game = CompChasingGame(None, 8, 8, 0., 0., 0.)
             initialize_fn(game)
 
             await game.command(unit_index=0, command_type=Directions.DOWN_RIGHT, is_red_command=False)
 
-            if np.array_equal(game.red_unit_positions[0], np.array([2,0])):
+            if np.array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([2,0])):
                 left = True
-            elif np.array_equal(game.red_unit_positions[0], np.array([1,2])):
+            elif np.array_equal(axial_to_evenr(game.red_unit_positions, 8)[0], np.array([1,2])):
                 right = True
             else:
                 raise ValueError(f"Unexpected position: {game.red_unit_positions}")

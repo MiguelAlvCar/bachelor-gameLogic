@@ -10,34 +10,41 @@ class TestFindNextFields(unittest.TestCase):
     def test_find_next_fields1(self):
         map = Map(10, 8)
         next_fields = map.find_next_fields(np.array([2, 2]))
-        npt.assert_array_equal(next_fields, np.array([[2,1],[1,2],[1,3],[2,3],[3,3],[3,2]]))
+        next_fields = np.array(next_fields, dtype=np.int16)
+        npt.assert_array_equal(next_fields, np.array([[3, 2],[3, 1],[2, 3]]))
 
     def test_find_next_fields2(self):
         map = Map(10, 8)
         next_fields = map.find_next_fields(np.array([1, 8]))
-        npt.assert_array_equal(next_fields, np.array([[1,7],[0,7],[0,8],[1,9],[2,8],[2,7]]))
+        next_fields = np.array(next_fields, dtype=np.int16)
+        npt.assert_array_equal(next_fields, np.array([[2, 7],[1, 7]]))
 
     def test_find_next_fields3(self):
         map = Map(10, 8)
         next_fields = map.find_next_fields(np.array([0, 0]))
-        npt.assert_array_equal(next_fields, np.array([[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0]]))
+        next_fields = np.array(next_fields, dtype=np.int16)
+        npt.assert_array_equal(next_fields, np.array([]))
 
     def test_find_next_fields4(self):
         map = Map(10, 8)
-        next_fields = map.find_next_fields(np.array([7, 9]))
-        npt.assert_array_equal(next_fields, np.array([[7,8],[6,8],[6,9],[-1,10],[-1,9],[-1,8]]))
+        next_fields = map.find_next_fields(np.array([9, 7]))
+        next_fields = np.array(next_fields, dtype=np.int16)
+        npt.assert_array_equal(next_fields, np.array([[ 8,  7],[10,  6],[ 9,  6]]))
 
     def test_find_next_fields5(self):
         map = Map(10, 7)
         next_fields = map.find_next_fields(np.array([6, 0]))
-        npt.assert_array_equal(next_fields, np.array([[-1,-1],[5,0],[5,1],[6,1],[-1,1],[-1,0]]))
+        next_fields = np.array(next_fields, dtype=np.int16)
+        npt.assert_array_equal(next_fields, np.array([[7, 0],[5, 0],[5, 1],[6, 1]]))
 
     def test_find_next_fields6(self):
         map = Map(10, 9)
         next_fields = map.find_next_fields(np.array([6, 0]))
-        npt.assert_array_equal(next_fields, np.array([[-1,-1],[5,0],[5,1],[6,1],[7,1],[7,0]]))
+        next_fields = np.array(next_fields, dtype=np.int16)
+        npt.assert_array_equal(next_fields, np.array([[7, 0],[5, 0],[5, 1],[6, 1]]))
 
     def test_find_next_fields7(self):
         map = Map(10, 9)
-        next_fields = map.find_next_fields(np.array([6, 9]))
-        npt.assert_array_equal(next_fields, np.array([[6,8],[5,9],[-1,10],[-1,10],[-1,10],[7,9]]))
+        next_fields = map.find_next_fields(np.array([9, 6]))
+        next_fields = np.array(next_fields, dtype=np.int16)
+        npt.assert_array_equal(next_fields, np.array([[10,  6],[ 8,  6],[ 8,  7],[10,  5],[ 9,  5],[ 9, 7]]))

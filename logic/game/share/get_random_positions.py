@@ -12,7 +12,7 @@ def get_random_not_overlapping_positions(width, height, number_of_positions):
             grid[i * height + j] = np.array([j, i])
 
 
-    is_in_position_idx = np.zeros(number_of_cells, dtype=np.bool)
+    is_in_position_idx = np.zeros(number_of_cells, dtype=np.bool_)
     positions_idx = np.empty(number_of_positions, dtype=np.int16)
     counting = np.zeros(number_of_cells, dtype=np.int16)
 

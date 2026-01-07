@@ -3,8 +3,7 @@ import numpy as np
 
 
 @njit(cache=True)
-def axial_to_evenr(evenr_coordinates):
-    parity = evenr_coordinates[1] & 1
-    col = evenr_coordinates[0] + (evenr_coordinates[1] + parity) // 2
-    row = evenr_coordinates[1]
-    return np.array([row, col])
+def axial_to_evenr(evenr_coordinates, map_height):
+    col = evenr_coordinates[:, 0] - map_height // 2 + (evenr_coordinates[:, 1] + 1) // 2
+
+    return np.column_stack((evenr_coordinates[:, 1], col))

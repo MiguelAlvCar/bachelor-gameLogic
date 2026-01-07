@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-import numpy.testing as npt
 
 from logic.game.several_units_game.generate_units.generate_deployment_areas import generate_deployment_areas
 from logic.map.map import Map

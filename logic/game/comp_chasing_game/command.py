@@ -9,6 +9,7 @@ from logic.game.comp_chasing_game.combat import combat
 from logic.game.comp_chasing_game.rules.movement_cost import movement_cost
 from logic.game.comp_chasing_game.change_position import change_position
 from logic.game.comp_chasing_game.rules.general_rules import limit_organisation_attack
+from logic.map.coordinates.valid_coord import valid_coord
 
 async def command(game: GameBase, unit_index: int, command_index: Directions, is_red_command: bool,
             on_finished: Callable[[float], Awaitable[None]]
@@ -37,8 +38,8 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
     if unit_movement[unit_index] <= 0:
         raise InvalidCommandError(f"The unit '{unit_index}' has no movement points left")
 
-    friend_ocupied_terrains: List[tuple[int, int]] = []
-    enemy_ocupied_terrains: List[tuple[int, int]] = []
+    friend_occupied_terrains: List[tuple[int, int]] = []
+    enemy_occupied_terrains: List[tuple[int, int]] = []
 
     edited_red_units = np.array([], dtype=np.int16)
     edited_blue_units = np.array([], dtype=np.int16)
@@ -48,7 +49,7 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
 
     target_field = game.map.find_direction_field(command_index.value, unit_positions[unit_index])
 
-    if target_field[0] == -1:
+    if not valid_coord(target_field, game.map.playable_fields):
         raise InvalidCommandError("Movement outside of board.")
 
     if position_contrary_units[target_field[0], target_field[1]] != -1:
@@ -64,13 +65,13 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
                                                      position_contrary_units[target_field[0], target_field[1]].item(),
                                                      is_red_command,
                                                      command_index,
-                                                     friend_ocupied_terrains,
-                                                     enemy_ocupied_terrains,
+                                                     friend_occupied_terrains,
+                                                     enemy_occupied_terrains,
                                                      on_finished)
         unit_movement[unit_index] = 0
     else:
         change_position(unit_index, unit_positions, position_own_units, target_field,
-                        friend_ocupied_terrains, game.map.terrain_types)
+                        friend_occupied_terrains, game.map.terrain_types)
 
         if is_red_command:
             edited_red_units = np.append(edited_red_units, unit_index)
@@ -81,22 +82,22 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
         unit_movement[unit_index] -= movement_cost[terrain_type.item()]
 
     if is_red_command:
-        has_new_red_ocupied = len(friend_ocupied_terrains) > 0
-        has_new_blue_ocupied = len(enemy_ocupied_terrains) > 0
-        friend_ocupied_fields = game.map.red_occupied_fields
-        enemy_ocupied_fields = game.map.blue_occupied_fields
+        has_new_red_ocupied = len(friend_occupied_terrains) > 0
+        has_new_blue_ocupied = len(enemy_occupied_terrains) > 0
+        friend_occupied_fields = game.map.red_occupied_fields
+        enemy_occupied_fields = game.map.blue_occupied_fields
     else:
-        has_new_red_ocupied = len(enemy_ocupied_terrains) > 0
-        has_new_blue_ocupied = len(friend_ocupied_terrains) > 0
-        friend_ocupied_fields = game.map.blue_occupied_fields
-        enemy_ocupied_fields = game.map.red_occupied_fields
+        has_new_red_ocupied = len(enemy_occupied_terrains) > 0
+        has_new_blue_ocupied = len(friend_occupied_terrains) > 0
+        friend_occupied_fields = game.map.blue_occupied_fields
+        enemy_occupied_fields = game.map.red_occupied_fields
 
-    for ocupied_terrain in friend_ocupied_terrains:
-        friend_ocupied_fields[ocupied_terrain] = None
-        enemy_ocupied_fields.pop(ocupied_terrain, None)
-    for ocupied_terrain in enemy_ocupied_terrains:
-        enemy_ocupied_fields[ocupied_terrain] = None
-        friend_ocupied_fields.pop(ocupied_terrain, None)
+    for occupied_terrain in friend_occupied_terrains:
+        friend_occupied_fields[occupied_terrain] = None
+        enemy_occupied_fields.pop(occupied_terrain, None)
+    for occupied_terrain in enemy_occupied_terrains:
+        enemy_occupied_fields[occupied_terrain] = None
+        friend_occupied_fields.pop(occupied_terrain, None)
 
     return edited_red_units, edited_blue_units, has_new_red_ocupied, has_new_blue_ocupied
 

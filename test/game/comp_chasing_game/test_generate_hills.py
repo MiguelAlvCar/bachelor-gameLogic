@@ -7,6 +7,6 @@ from logic.map.map import Map
 class TestGenerateHills(unittest.TestCase):
 
     def test_generate_hills(self):
-        map = Map(width=5, height=5)
+        map = Map(even_width=5, height=5)
         generate_hills(map, 0.2)
 

@@ -1,14 +1,14 @@
-import math
 from numba import njit
 from numba.typed import List
 import numpy as np
+from numba import types
 
 @njit(cache=True)
 def find_hex_line(axial_origin, axial_end):
     distance = max(abs(axial_origin[0] - axial_end[0]),
                    abs(axial_origin[1] - axial_end[1]),
                    abs(axial_end[0] + axial_end[1] - axial_origin[0] - axial_origin[1]))
-    results = List.empty_list(np.int64[:])
+    results = List.empty_list(types.int64[:])
     for i in range(distance + 1):
         interval = 0 if distance == 0 else i / distance
         results.append(_cube_round(_cube_lerp(axial_origin, axial_end, interval)))
@@ -27,5 +27,5 @@ def _cube_round(coor):
 
 @njit(cache=True)
 def _cube_lerp(origin, end, interval):
-    return np.array([origin[0] + (end[0] - origin[0]) * interval,
-            origin[1] + (end[1] - origin[1]) * interval])
+    return np.array([origin[0] + (end[0] - origin[0]) * interval - 0.00001,
+            origin[1] + (end[1] - origin[1]) * interval + 0.00001])
