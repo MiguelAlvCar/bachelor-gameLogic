@@ -15,8 +15,8 @@ async def command(game: GameBase, unit_index: int, command_index: Directions, is
             on_finished: Callable[[float], Awaitable[None]]
             ) -> tuple[npt.NDArray[np.int16], npt.NDArray[np.int16]]:
     if (game.is_red_turn and not is_red_command) or (not game.is_red_turn and is_red_command):
-        raise InvalidCommandError(f"A command for {"red" if is_red_command else "blue"} units was receive during the "+
-                                  f"{"blue" if is_red_command else "red"} turn")
+        raise InvalidCommandError(f"A command for {'red' if is_red_command else 'blue'} units was receive during the "+
+                                  f"{'blue' if is_red_command else 'red'} turn")
     if game.result != None:
         raise InvalidCommandError("A command was receive after the end of the game")
 
