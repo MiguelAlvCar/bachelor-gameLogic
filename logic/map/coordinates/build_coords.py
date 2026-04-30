@@ -3,7 +3,7 @@ from numba import njit
 
 
 @njit(cache=True)
-def build_coords(height, width):
+def build_coords(width, height):
     coords = np.empty((width, height, 2), dtype=np.int32)
     for i in range(width):
         for j in range(height):

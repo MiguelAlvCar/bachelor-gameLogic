@@ -16,11 +16,11 @@ def find_ring(position, radius):
 
     hex = position.astype(np.int16)
     for i in range(radius):
-        hex = find_direction_field(4, hex)
+        hex = find_direction_field(0, hex)
 
     for i in range(6):
         for _ in range(radius):
-            hex = find_direction_field(i, hex)
             ring_fields.append(hex.astype(np.int64).copy())
+            hex = find_direction_field((i + 2) % 6, hex)
 
     return ring_fields

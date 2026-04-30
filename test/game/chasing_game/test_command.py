@@ -161,7 +161,7 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(InvalidCommandError) as error:
             await game.command(unit_index=0, command_type=Directions.LEFT, is_red_command=True)
 
-        self.assertEqual(str(error.exception), "A command was receive after the end of the game")
+        self.assertEqual(str(error.exception), "A command was received after the end of the game")
 
     async def test_tie1(self):
         axial_coords = evenr_to_axial(np.array([[0, 0],[0, 1]]), 8)
@@ -183,4 +183,4 @@ class TestCommand(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(InvalidCommandError) as error:
             await game.command(unit_index=0, command_type=Directions.RIGHT, is_red_command=False)
 
-        self.assertEqual(str(error.exception), "A command was receive after the end of the game")
+        self.assertEqual(str(error.exception), "A command was received after the end of the game")

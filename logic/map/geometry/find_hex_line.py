@@ -3,11 +3,11 @@ from numba.typed import List
 import numpy as np
 from numba import types
 
+from logic.map.geometry.calculate_distance import calculate_distance
+
 @njit(cache=True)
 def find_hex_line(axial_origin, axial_end):
-    distance = max(abs(axial_origin[0] - axial_end[0]),
-                   abs(axial_origin[1] - axial_end[1]),
-                   abs(axial_end[0] + axial_end[1] - axial_origin[0] - axial_origin[1]))
+    distance = calculate_distance(axial_origin, axial_end)
     results = List.empty_list(types.int64[:])
     for i in range(distance + 1):
         interval = 0 if distance == 0 else i / distance

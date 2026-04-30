@@ -56,3 +56,18 @@ class TestFindDirectionField(unittest.TestCase):
         map = Map(10, 8)
         next_field = map.find_direction_field(5, np.array([1, 1]))
         npt.assert_array_equal(next_field, np.array([0,2]))
+
+    def test_find_direction_inverse_for_neighbors(self):
+        map = Map(10, 8)
+        origin = np.array([2, 2], dtype=np.int16)
+
+        for direction in range(6):
+            target = map.find_direction_field(direction, origin)
+            found_direction = map.find_direction(origin, target)
+            self.assertEqual(found_direction, direction)
+
+    def test_find_direction_raises_for_non_neighbors(self):
+        map = Map(10, 8)
+
+        with self.assertRaises(ValueError):
+            map.find_direction(np.array([2, 2], dtype=np.int16), np.array([4, 2], dtype=np.int16))
